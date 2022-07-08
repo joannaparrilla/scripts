@@ -23,7 +23,7 @@ linetocrontab="@reboot /home/containernode/dockerpermission.sh"
 #ssh authentication
 mkdir /home/containernode/.ssh
 chmod 700 /home/containernode/.ssh
-ssh-keygen -b 2048 -t rsa -f /home/containernode/.ssh/sshkey -q -N ""
+ssh-keygen -t ed25519 -f /home/containernode/.ssh/sshkey -q -N ""
 sudo service sshd restart
 #Mostrarme la clave privada para agregar  en Jenkins
 cat /home/containernode/.ssh/sshkey
