@@ -9,6 +9,7 @@ apt-get install awscli -y
 useradd containernode --create-home --shell /bin/bash --groups sudo
 #create JenkinsPath
 mkdir /home/containernode/jenkins
+chown containernode:containernode /home/containernode/jenkins
 
 #add permissions /var/run/docker.sock cront task
 touch /home/containernode/dockerpermission.sh
