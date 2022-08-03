@@ -31,3 +31,5 @@ chown -R containernode:containernode /home/containernode/.ssh/
 sudo service sshd restart
 #Mostrarme la clave privada para agregar  en Jenkins
 cat /home/containernode/.ssh/authorized_keys.private
+#Asignar password al usuario y guardarla en keepass
+passwd containernode
