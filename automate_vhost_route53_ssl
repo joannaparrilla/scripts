@@ -1,0 +1,63 @@
+### Ejecuto el Script y paso 4 datos como parámetro ###
+### prueba.genexus.com 192.168.1.1 ID_ZONE containernode:port ###
+#######################START#####################################
+#!/bin/bash
+
+NAMEOFRECORD="$1"
+PUBLIC_IP="$2"
+ZONE_ID="$3"
+URL_PORT_CONTAINER="$4"
+
+ctrlnom='^[0-9a-zA-Z.]+$'
+        if ! [[ $NAMEOFRECORD =~ $ctrlnom ]] ; then
+                echo "ERROR: ha ingresado caracteres no admitidos para un dominio" >&2; exit 1
+        fi
+ctrlnum='^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$'
+        if ! [[ $PUBLIC_IP =~ $ctrlnum ]] ; then
+                echo "ERROR: el valor ingresado no tiene el formato de una direccion IP" >&2; exit 1
+        fi
+
+ctrlfile=/root/change-resource-record-sets_"$NAMEOFRECORD".json
+         if [ -f "$ctrlfile" ] ; then
+                echo "ERROR: El registro ya existe" >&2; exit 1
+        fi
+
+cat > /root/change-resource-record-sets_"$NAMEOFRECORD".json << EOF
+{
+    "Comment": "DevOps GX - New A Record in Route53",
+    "Changes": [
+        {
+            "Action": "CREATE",
+            "ResourceRecordSet": {
+                "Name": "${NAMEOFRECORD}",
+                "Type": "A",
+                "TTL": 300,
+                "ResourceRecords": [
+                    {
+                        "Value": "${PUBLIC_IP}"
+                    }
+                ]
+            }
+        }
+    ]
+}
+EOF
+
+echo "Creating Apache Site Configuration File"
+echo "<VirtualHost *:80>
+        ServerName $NAMEOFRECORD
+        ServerAdmin alertas@genexus.com
+        ProxyPass / "http://$URL_PORT_CONTAINER"/ nocanon
+        ProxyPassReverse / "http://$URL_PORT_CONTAINER"/
+</VirtualHost>" > /etc/apache2/sites-available/"$NAMEOFRECORD.conf"
+
+echo "Habilitando el sitio & recargando Apache (editar /etc/apache2/sites-available/"$NAMEOFRECORD.conf" para mas opciones)"
+a2ensite $NAMEOFRECORD
+/etc/init.d/apache2 reload
+
+aws route53 change-resource-record-sets --hosted-zone-id $ZONE_ID --profile route53user --change-batch file:///root/change-resource-record-sets_"$NAMEOFRECORD".json > /dev/null
+
+sleep 30
+
+#Let's Encrypt
+sudo certbot --apache -d $NAMEOFRECORD
