@@ -1,5 +1,5 @@
 ### Ejecuto el Script y paso 4 datos como parámetro ###
-### prueba.genexus.com 192.168.1.1 ID_ZONE containernode:port ###
+### prueba.dominio.com 192.168.1.1 ID_ZONE containernode:port ###
 #######################START#####################################
 #!/bin/bash
 
@@ -46,7 +46,7 @@ EOF
 echo "Creating Apache Site Configuration File"
 echo "<VirtualHost *:80>
         ServerName $NAMEOFRECORD
-        ServerAdmin alertas@genexus.com
+        ServerAdmin alertas@dominio.com
         ProxyPass / "http://$URL_PORT_CONTAINER"/ nocanon
         ProxyPassReverse / "http://$URL_PORT_CONTAINER"/
 </VirtualHost>" > /etc/apache2/sites-available/"$NAMEOFRECORD.conf"
